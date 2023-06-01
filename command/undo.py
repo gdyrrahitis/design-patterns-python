@@ -11,6 +11,7 @@ class Command(ABC):
 
 
 class Calculator:
+    """Receiver"""
     def __init__(self):
         self.value = 0
 
@@ -21,42 +22,62 @@ class Calculator:
         return self.value
 
 class AddCommand(Command):
-    def __init__(self, adder):
+    """Concrete command"""
+    def __init__(self, calculator, adder):
         self.adder = adder
+        self.calculator = calculator
+        self.previous_value = self.calculator.get_value()
 
-    def execute(self, calculator):
-        self.previous_value = calculator.get_value()
+    def execute(self):
         result = self.previous_value + self.adder
-        calculator.set_value(result)
+        self.calculator.set_value(result)
 
-    def unexecute(self, calculator):
-        calculator.set_value(self.previous_value)
+    def unexecute(self):
+        self.calculator.set_value(self.previous_value)
 
 class SubtractCommand(Command):
-    def __init__(self, subtractor):
+    """Concrete command"""
+    def __init__(self, calculator, subtractor):
         self.subtractor = subtractor
-
-    def execute(self, calculator):
-        self.previous_value = calculator.get_value()
-        result = self.previous_value - self.subtractor
-        calculator.set_value(result)
-
-    def unexecute(self, calculator):
-        calculator.set_value(self.previous_value)
-
-class CalculatorApplication:
-    def __init__(self, calculator):
         self.calculator = calculator
+        self.previous_value = self.calculator.get_value()
+
+    def execute(self):
+        result = self.previous_value - self.subtractor
+        self.calculator.set_value(result)
+
+    def unexecute(self):
+        self.calculator.set_value(self.previous_value)
+
+class CalculationManager:
+    """Invoker"""
+    def __init__(self):
         self.stack = []
 
     def run_calculate_command(self, command):
         self.stack.append(command)
-        command.execute(self.calculator)
+        command.execute()
 
     def rollback_calculcate_command(self):
         if self.stack:
             command = self.stack.pop()
-            command.unexecute(self.calculator)
+            command.unexecute()
+
+class CalculatorApplication:
+    def __init__(self):
+        self.calculationManager = CalculationManager()
+        self.calculator = Calculator()
+    
+    def add(self, num):
+        add_command = AddCommand(self.calculator, num)
+        self.calculationManager.run_calculate_command(add_command)
+
+    def subtract(self, num):
+        subtract_command = SubtractCommand(self.calculator, num)
+        self.calculationManager.run_calculate_command(subtract_command)
+    
+    def undo(self):
+        self.calculationManager.rollback_calculcate_command()
 
     def get_current_value(self):
         return self.calculator.get_value()
