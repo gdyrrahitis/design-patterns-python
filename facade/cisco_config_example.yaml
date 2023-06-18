@@ -1,0 +1,36 @@
+interfaces:
+- description: Connection to LAN
+  ip_address: 192.168.1.1
+  name: GigabitEthernet0/0
+  status: up
+  subnet_mask: 255.255.255.0
+- description: Connection to Internet
+  ip_address: 203.0.113.1
+  name: GigabitEthernet0/1
+  status: up
+  subnet_mask: 255.255.255.0
+- description: Additional Interface
+  ip_address: 192.168.3.1
+  name: GigabitEthernet0/2
+  status: up
+  subnet_mask: 255.255.255.0
+routing:
+- network: 0.0.0.0
+  next_hop: 203.0.113.254
+  subnet_mask: 0.0.0.0
+- network: 192.168.2.0
+  next_hop: 192.168.1.2
+  subnet_mask: 255.255.255.0
+vlan:
+- id: 10
+  name: LAN
+  ports:
+  - GigabitEthernet0/0
+- id: 20
+  name: DMZ
+  ports:
+  - GigabitEthernet0/1
+- id: 30
+  name: Guest
+  ports:
+  - GigabitEthernet0/2
